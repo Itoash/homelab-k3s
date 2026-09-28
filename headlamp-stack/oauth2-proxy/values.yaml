@@ -1,18 +1,12 @@
 config:
   configFile: ""
-
-extraEnv:
-  - name: OAUTH2_PROXY_CLIENT_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: oauth2-proxy-credentials
-        key: client-secret
-
-  - name: OAUTH2_PROXY_COOKIE_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: oauth2-proxy-credentials
-        key: cookie-secret
+  # Use our SealedSecret directly instead of extraEnv, so the chart's own
+  # generated env vars (OAUTH2_PROXY_CLIENT_SECRET/COOKIE_SECRET) point here
+  # and we avoid duplicate env entries causing Argo CD merge-patch conflicts.
+  existingSecret: oauth2-proxy-credentials
+  requiredSecretKeys:
+    - client-secret
+    - cookie-secret
 
 alphaConfig:
   enabled: true
