@@ -1,38 +1,40 @@
-# 1. Map existing Secret keys to container environment variables
-# extraEnv:
-#   - name: OAUTH2_PROXY_CLIENT_SECRET
-#     valueFrom:
-#       secretKeyRef:
-#         name: oauth2-proxy-credentials
-#         key: client-secret
-#   - name: OAUTH2_PROXY_COOKIE_SECRET
-#     valueFrom:
-#       secretKeyRef:
-#         name: oauth2-proxy-credentials
-#         key: cookie-secret
-
-# 2. Disable legacy config generation to avoid option conflicts
 config:
   configFile: ""
 
-# 3. Use alphaConfig for full modern oauth2-proxy feature support
+extraEnv:
+  - name: OAUTH2_PROXY_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: oauth2-proxy-credentials
+        key: client-secret
+
+  - name: OAUTH2_PROXY_COOKIE_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: oauth2-proxy-credentials
+        key: cookie-secret
+
 alphaConfig:
   enabled: true
-  config:
+
+  configData:
     server:
       BindAddress: "0.0.0.0:4180"
 
     injectRequestHeaders: []
+
     injectResponseHeaders:
       - name: Authorization
         values:
           - claimSource:
               claim: access_token
               prefix: "Bearer "
+
       - name: X-Forwarded-User
         values:
           - claimSource:
               claim: user
+
       - name: X-Forwarded-Email
         values:
           - claimSource:
@@ -42,15 +44,15 @@ alphaConfig:
       upstreams:
         - id: headlamp
           path: /
-          uri: http://headlamp.headlamp.svc.cluster.local:80 # Target service
+          uri: http://headlamp.headlamp.svc.cluster.local:80
 
     providers:
       - id: github
         provider: github
         clientID: "Ov23livxDLXXajPOIG6w"
-        # Environment variable interpolation handled natively by oauth2-proxy
         clientSecret: "${OAUTH2_PROXY_CLIENT_SECRET}"
         scope: "user:email read:org"
+
         githubConfig:
           users:
             - "Itoash"
