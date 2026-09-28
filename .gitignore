@@ -1,0 +1,6 @@
+docker*
+docker-compose*
+.env*
+secrets.env
+README-old.md
+.DS_Store

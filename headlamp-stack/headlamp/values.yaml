@@ -1,0 +1,41 @@
+# Headlamp deployed behind oauth2-proxy (ForwardAuth via Traefik),
+# itself reachable only via the Tailscale operator ingress.
+# See manifests/ for the Traefik Middlewares/Ingress and the
+# Tailscale-facing Ingress that front this. Deployed by
+# argocd/apps/headlamp.yaml (Helm values only; nothing sensitive lives here).
+
+config:
+  inCluster: true
+  inClusterContextName: "main"
+
+  # oauth2-proxy handles per-browser-session identity via ForwardAuth;
+  # Headlamp still needs one credential to talk to the k8s API on
+  # everyone's behalf. Safe specifically because nothing reaches this
+  # Service without first passing through the ForwardAuth middleware.
+  unsafeUseServiceAccountToken: true
+
+  oidc:
+    secret:
+      create: false   # not using Headlamp's own OIDC flow at all
+
+  extraArgs:
+    - "-proxy-auth=true"
+    # username header defaults to X-Forwarded-User, which matches what
+    # oauth2-proxy's alphaConfig injects — no override needed
+
+clusterRoleBinding:
+  create: true
+  # NOTE: cluster-admin means every allowlisted GitHub user gets full
+  # cluster access. Fine for a single-operator homelab; narrow this to
+  # a scoped ClusterRole if you add more people later.
+  clusterRoleName: cluster-admin
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  # Ingress is managed by hand in manifests/headlamp-ingress.yaml,
+  # since it needs Traefik-specific middleware annotations the chart's
+  # generic ingress template doesn't support.
+  enabled: false

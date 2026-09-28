@@ -1,0 +1,22 @@
+# The ONLY thing you apply by hand:  kubectl apply -f headlamp-stack/argocd/root.yaml
+# It points at argocd/apps/, which holds the three child Applications.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/CHANGEME/CHANGEME.git
+    targetRevision: HEAD
+    path: headlamp-stack/argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,30 @@
+# Wave 2: Headlamp chart, values from this repo.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp-stack-headlamp
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/headlamp/
+      chart: headlamp
+      targetRevision: 0.45.0   # verify: helm search repo headlamp/headlamp
+      helm:
+        releaseName: headlamp
+        valueFiles:
+          - $values/headlamp-stack/headlamp/values.yaml
+    - repoURL: https://github.com/CHANGEME/CHANGEME.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

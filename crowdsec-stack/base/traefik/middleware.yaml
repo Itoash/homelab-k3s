@@ -1,0 +1,28 @@
+apiVersion: traefik.io/v1alpha1     # traefik.containo.us/v1alpha1 on Traefik v2 (old k3s)
+kind: Middleware
+metadata:
+  name: bouncer
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  plugin:
+    bouncer:
+      enabled: true
+      crowdsecMode: stream
+      crowdsecLapiScheme: http
+      crowdsecLapiHost: crowdsec-service.crowdsec.svc.cluster.local:8080
+      crowdsecLapiPath: /
+      crowdsecLapiKeyFile: /etc/traefik/crowdsec/BOUNCER_KEY_traefik
+      crowdsecAppsecEnabled: true
+      crowdsecAppsecHost: crowdsec-appsec-service.crowdsec.svc.cluster.local:7422
+      crowdsecAppsecPath: /
+      crowdsecAppsecFailureBlock: true
+      # true = fail closed (docs' value). Because this middleware is attached to
+      # the entrypoints, an AppSec outage would return errors for ALL ingress
+      # traffic. Set to false if you prefer availability over strictness.
+      crowdsecAppsecUnreachableBlock: true
+      crowdsecAppsecBodyLimit: 10485760
+      # Only if Traefik sits behind a CDN/LB/proxy (also set Traefik's own
+      # entrypoint forwardedHeaders/proxyProtocol trustedIPs to the same ranges):
+      # forwardedHeadersTrustedIps: <trusted-cidr>

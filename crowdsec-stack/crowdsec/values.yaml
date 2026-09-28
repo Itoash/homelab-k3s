@@ -1,0 +1,56 @@
+# Helm values for the crowdsec chart (https://crowdsecurity.github.io/helm-charts)
+container_runtime: containerd
+
+agent:
+  acquisition:
+    - namespace: kube-system          # k3s bundled Traefik
+      podName: traefik-*
+      program: traefik
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/traefik"
+
+lapi:
+  # CHANGE ME: node that runs the host firewall bouncer. The default local-path
+  # PVC binds to whichever node the pod first lands on, so this pins data too.
+  nodeSelector:
+    kubernetes.io/hostname: homelab-vps
+  env:
+    - name: BOUNCER_KEY_TRAEFIK
+      valueFrom:
+        secretKeyRef: { name: crowdsec-keys, key: BOUNCER_KEY_TRAEFIK }
+    - name: BOUNCER_KEY_FIREWALL
+      valueFrom:
+        secretKeyRef: { name: crowdsec-keys, key: BOUNCER_KEY_FIREWALL }
+
+config:
+  config.yaml.local: |
+    api:
+      client:
+        unregister_on_exit: true
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}"   # handled by the chart; do not modify
+          allowed_ranges:                  # adapt to your pod CIDR (k3s: 10.42.0.0/16)
+            - "127.0.0.1/32"
+            - "10.0.0.0/8"
+            - "192.168.0.0/16"
+            - "172.16.0.0/12"
+    # SQLite (chart default) is fine for a single pinned LAPI. Add db_config
+    # here for PostgreSQL/MariaDB if you later want a replicated LAPI.
+
+appsec:
+  enabled: true
+  acquisitions:
+    - source: appsec
+      listen_addr: "0.0.0.0:7422"
+      path: /
+      appsec_configs:
+        - crowdsecurity/appsec-default
+        - crowdsecurity/crs
+      labels:
+        type: appsec
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs crowdsecurity/appsec-generic-rules"

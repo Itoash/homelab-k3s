@@ -1,0 +1,28 @@
+# Wave 0: shared config + sealed secret + Traefik/Tailscale plumbing.
+# Runs first so the Secret/ConfigMaps exist before oauth2-proxy starts.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp-stack-manifests
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/CHANGEME/CHANGEME.git
+    targetRevision: HEAD
+    path: headlamp-stack/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    # Default namespace for objects that don't set one (the ConfigMaps).
+    # Everything else sets metadata.namespace explicitly (kube-system / oauth2-proxy).
+    namespace: oauth2-proxy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

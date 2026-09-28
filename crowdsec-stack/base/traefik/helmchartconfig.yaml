@@ -1,0 +1,42 @@
+# Configures the k3s-bundled Traefik. Manage this via ArgoCD only: do not also
+# keep a copy in /var/lib/rancher/k3s/server/manifests/ or k3s will fight it.
+# Only one HelmChartConfig named "traefik" may exist:
+#   kubectl -n kube-system get helmchartconfig
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  valuesContent: |-
+    experimental:
+      plugins:
+        bouncer:                     # must match the key in the Middleware spec.plugin
+          moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+          version: v1.4.5
+    volumes:
+      - name: crowdsec-bouncer-key   # the chart uses this as the Secret name
+        mountPath: /etc/traefik/crowdsec
+        type: secret
+    # CHANGE ME: same node as the host firewall bouncer / LAPI
+    nodeSelector:
+      kubernetes.io/hostname: homelab-vps
+    service:
+      spec:
+        externalTrafficPolicy: Local   # preserve real client IPs
+    logs:
+      access:
+        enabled: true                  # keep the default (non-JSON) format for the CrowdSec parser
+    ports:
+      web:
+        http:
+          middlewares:
+            - kube-system-bouncer@kubernetescrd
+      websecure:
+        http:
+          middlewares:
+            - kube-system-bouncer@kubernetescrd
+    # VERIFY these keys against the chart version k3s ships:
+    #   kubectl -n kube-system get helmchart traefik -o yaml

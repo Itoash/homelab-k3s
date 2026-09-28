@@ -1,0 +1,36 @@
+# oauth2-proxy alpha config -> ConfigMap "oauth2-proxy-alpha" (key: oauth2_proxy.yml)
+# Non-secret and safe to edit later (e.g. add GitHub users). Restart oauth2-proxy
+# after changes; it does not hot-reload this file.
+#
+# The GitHub client secret is NOT here: it is read from the sealed Secret via
+# clientSecretFile (mounted by oauth2-proxy/values.yaml).
+injectResponseHeaders:
+  - name: Authorization
+    values:
+      - claimSource:
+          claim: access_token
+          prefix: "Bearer "
+  - name: X-Forwarded-User
+    values:
+      - claimSource:
+          claim: user
+  - name: X-Forwarded-Email
+    values:
+      - claimSource:
+          claim: email
+  - name: X-Forwarded-Group
+    values:
+      - claimSource:
+          claim: groups
+providers:
+  - id: github
+    provider: github
+    # OAuth client IDs are public (they appear in the authorize URL), so this
+    # is config rather than a secret. Paste your GitHub OAuth App client ID.
+    clientID: "Ov23livxDLXXajPOIG6w"
+    clientSecretFile: /etc/oauth2-proxy-credentials/client-secret
+    scope: "user:email read:org"
+    githubConfig:
+      users:
+        - "Itoash"
+        # - "second-allowed-username"

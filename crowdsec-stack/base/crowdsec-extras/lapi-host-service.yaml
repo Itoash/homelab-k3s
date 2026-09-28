@@ -1,0 +1,18 @@
+# Exposes LAPI on 127.0.0.1:30080 of the pinned node for the host firewall bouncer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: crowdsec-lapi-host
+  namespace: crowdsec
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector:
+    # VERIFY: kubectl -n crowdsec get pods --show-labels
+    k8s-app: crowdsec
+    type: lapi
+  ports:
+    - name: lapi
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080

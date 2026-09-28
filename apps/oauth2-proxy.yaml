@@ -1,0 +1,32 @@
+# Wave 1: oauth2-proxy chart, values from this repo.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp-stack-oauth2-proxy
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://oauth2-proxy.github.io/manifests
+      chart: oauth2-proxy
+      targetRevision: 10.7.0   # verify: helm search repo oauth2-proxy/oauth2-proxy
+      helm:
+        releaseName: oauth2-proxy
+        valueFiles:
+          - $values/headlamp-stack/oauth2-proxy/values.yaml
+    - repoURL: https://github.com/CHANGEME/CHANGEME.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: oauth2-proxy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
