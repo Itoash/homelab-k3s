@@ -1,15 +1,15 @@
 # 1. Map existing Secret keys to container environment variables
-extraEnv:
-  - name: OAUTH2_PROXY_CLIENT_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: oauth2-proxy-credentials
-        key: client-secret
-  - name: OAUTH2_PROXY_COOKIE_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: oauth2-proxy-credentials
-        key: cookie-secret
+# extraEnv:
+#   - name: OAUTH2_PROXY_CLIENT_SECRET
+#     valueFrom:
+#       secretKeyRef:
+#         name: oauth2-proxy-credentials
+#         key: client-secret
+#   - name: OAUTH2_PROXY_COOKIE_SECRET
+#     valueFrom:
+#       secretKeyRef:
+#         name: oauth2-proxy-credentials
+#         key: cookie-secret
 
 # 2. Disable legacy config generation to avoid option conflicts
 config:
