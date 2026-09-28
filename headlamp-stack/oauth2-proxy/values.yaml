@@ -8,6 +8,12 @@ config:
     - client-secret
     - cookie-secret
 
+# Cookie flags aren't part of the AlphaOptions schema, so set them via CLI args.
+extraArgs:
+  cookie-domain: "headlamp.tail3aac60.ts.net"
+  cookie-secure: "true"
+  cookie-samesite: "lax"
+
 alphaConfig:
   enabled: true
 
@@ -47,9 +53,3 @@ alphaConfig:
         githubConfig:
           users:
             - "Itoash"
-
-    cookie:
-      secret: "${OAUTH2_PROXY_COOKIE_SECRET}"
-      domain: "headlamp.tail3aac60.ts.net"
-      secure: true
-      samesite: "lax"
