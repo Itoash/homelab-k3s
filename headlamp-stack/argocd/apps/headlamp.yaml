@@ -18,7 +18,7 @@ spec:
         releaseName: headlamp
         valueFiles:
           - $values/headlamp-stack/headlamp/values.yaml
-    - repoURL: https://github.com/CHANGEME/CHANGEME.git
+    - repoURL: https://github.com/Itoash/homelab-k3s.git # homelab-repo
       targetRevision: HEAD
       ref: values
   destination:

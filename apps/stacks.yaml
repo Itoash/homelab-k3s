@@ -1,0 +1,37 @@
+# Auto-discovers every top-level "*-stack" directory and creates one Application
+# per stack, pointing at <stack>/argocd/apps (that stack's child Applications).
+#
+# Add a stack  = create media-stack/ with an argocd/apps/ directory. Nothing else.
+# Remove one   = delete the directory (its Application and resources get pruned).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: stacks
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/Itoash/homelab-k3s.git # homelab-repo
+        revision: HEAD
+        directories:
+          - path: "*-stack"
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Itoash/homelab-k3s.git # homelab-repo
+        targetRevision: HEAD
+        path: '{{.path.path}}/argocd/apps'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

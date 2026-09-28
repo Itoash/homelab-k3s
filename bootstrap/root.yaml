@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/CHANGEME/CHANGEME.git
+    repoURL: https://github.com/Itoash/homelab-k3s.git
     targetRevision: HEAD
     path: headlamp-stack/argocd/apps
   destination:
