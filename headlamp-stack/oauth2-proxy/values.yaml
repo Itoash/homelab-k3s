@@ -12,9 +12,6 @@ alphaConfig:
   enabled: true
 
   configData:
-    server:
-      BindAddress: "0.0.0.0:4180"
-
     injectRequestHeaders: []
 
     injectResponseHeaders:
