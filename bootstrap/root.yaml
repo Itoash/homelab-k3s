@@ -1,18 +1,19 @@
-# The ONLY thing you apply by hand:  kubectl apply -f headlamp-stack/argocd/root.yaml
-# It points at argocd/apps/, which holds the three child Applications.
+# The ONLY thing you apply by hand:  kubectl apply -f bootstrap/root.yaml
+# It deploys everything in apps/ (the stack ApplicationSet, plus any shared
+# infra Applications you add there later).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: headlamp-stack
+  name: homelab
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/Itoash/homelab-k3s.git
+    repoURL: https://github.com/Itoash/homelab-k3s.git # homelab-repo
     targetRevision: HEAD
-    path: headlamp-stack/argocd/apps
+    path: apps
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
