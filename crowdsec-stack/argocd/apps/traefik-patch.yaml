@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crowdsec-stack-traefik-patch
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Itoash/homelab-k3s.git # homelab-repo
+    targetRevision: HEAD
+    path: crowdsec-stack/base/traefik
+  destination:
+    server: https://kubernetes.default.svc
+    # Default namespace for objects that don't set one (the ConfigMaps).
+    # Everything else sets metadata.namespace explicitly (kube-system / oauth2-proxy).
+    namespace: crowdsec
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
